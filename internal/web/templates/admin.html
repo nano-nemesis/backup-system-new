@@ -1,0 +1,180 @@
+{{template "base" .}}
+
+{{define "title"}}User Management — Backup System{{end}}
+{{define "nav-admin"}}active{{end}}
+
+{{define "content"}}
+<div class="page-header flex items-center justify-between" style="flex-wrap:wrap;gap:.75rem">
+  <div>
+    <h1 class="page-title">User Management</h1>
+    <p class="page-sub">{{len .Users}} user(s) registered</p>
+  </div>
+  <button class="btn btn-primary" onclick="openModal('modal-create')">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+    Add User
+  </button>
+</div>
+
+{{if .Error}}
+  <div class="alert alert-error" style="margin-bottom:1rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
+    {{.Error}}
+  </div>
+{{end}}
+{{if .Success}}
+  <div class="alert alert-success" style="margin-bottom:1rem">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    {{.Success}}
+  </div>
+{{end}}
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Users}}
+      <tr>
+        <td>
+          <strong>{{.Username}}</strong>
+          {{if eq .ID $.Session.UserID}}<span class="badge badge-unknown" style="margin-left:.35rem">you</span>{{end}}
+        </td>
+        <td><span class="badge badge-{{.Role}}">{{.Role}}</span></td>
+        <td class="text-muted text-sm">{{fmtTime .CreatedAt}}</td>
+        <td>
+          <div class="user-actions">
+            <button class="btn btn-ghost btn-sm" onclick="openRoleModal('{{.ID}}','{{.Username}}','{{.Role}}')">Change Role</button>
+            <button class="btn btn-ghost btn-sm" onclick="openPassModal('{{.ID}}','{{.Username}}')">Reset Password</button>
+            {{if ne .ID $.Session.UserID}}
+              <button class="btn btn-danger btn-sm" onclick="openDeleteModal('{{.ID}}','{{.Username}}')">Delete</button>
+            {{end}}
+          </div>
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+<!-- Create user modal -->
+<div class="modal-overlay" id="modal-create">
+  <div class="modal">
+    <h2 class="modal-title">Add User</h2>
+    <form method="POST" action="/admin/users" style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input class="form-input" type="text" name="username" required autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password <span class="text-muted text-sm">(min 8 chars)</span></label>
+        <input class="form-input" type="password" name="password" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-select" name="role">
+          <option value="viewer">Viewer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="flex gap-2" style="margin-top:.25rem">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-create')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Change role modal -->
+<div class="modal-overlay" id="modal-role">
+  <div class="modal">
+    <h2 class="modal-title">Change Role — <span id="role-username"></span></h2>
+    <form method="POST" id="form-role" style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="form-group">
+        <label class="form-label">New Role</label>
+        <select class="form-select" name="role" id="role-select">
+          <option value="viewer">Viewer</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-role')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Reset password modal -->
+<div class="modal-overlay" id="modal-pass">
+  <div class="modal">
+    <h2 class="modal-title">Reset Password — <span id="pass-username"></span></h2>
+    <form method="POST" id="form-pass" style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="form-group">
+        <label class="form-label">New Password <span class="text-muted text-sm">(min 8 chars)</span></label>
+        <input class="form-input" type="password" name="password" required>
+      </div>
+      <div class="flex gap-2">
+        <button type="submit" class="btn btn-primary">Update</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-pass')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Delete modal -->
+<div class="modal-overlay" id="modal-delete">
+  <div class="modal">
+    <h2 class="modal-title">Delete User</h2>
+    <p style="color:var(--text-muted);font-size:.875rem">Delete <strong id="del-username"></strong>? This cannot be undone.</p>
+    <form method="POST" id="form-delete">
+      <div class="flex gap-2" style="margin-top:.5rem">
+        <button type="submit" class="btn btn-danger">Delete</button>
+        <button type="button" class="btn btn-ghost" onclick="closeModal('modal-delete')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+function openRoleModal(id, name, role) {
+  document.getElementById('role-username').textContent = name;
+  document.getElementById('form-role').action = '/admin/users/' + id + '/role';
+  document.getElementById('role-select').value = role;
+  openModal('modal-role');
+}
+
+function openPassModal(id, name) {
+  document.getElementById('pass-username').textContent = name;
+  document.getElementById('form-pass').action = '/admin/users/' + id + '/password';
+  openModal('modal-pass');
+}
+
+function openDeleteModal(id, name) {
+  document.getElementById('del-username').textContent = name;
+  document.getElementById('form-delete').action = '/admin/users/' + id + '/delete';
+  openModal('modal-delete');
+}
+</script>
+{{end}}

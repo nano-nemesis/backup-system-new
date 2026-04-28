@@ -1,0 +1,313 @@
+[
+  {
+    "name": "db-myperwira",
+    "type": "database",
+    "host": "1.2.3.4",
+    "port": 22,
+    "ssh_user": "root",
+    "ssh_key": "/root/.ssh/myperwira",
+    "db_name": "app_production",
+    "db_user": "backup",
+    "db_pass": "replace-with-strong-password"
+  },
+  {
+    "name": "db-myperwiracloud",
+    "type": "database",
+    "host": "5.6.7.8",
+    "port": 22,
+    "ssh_user": "root",
+    "ssh_key": "/root/.ssh/myperwiracloud",
+    "db_name": "billing_production",
+    "db_user": "backup",
+    "db_pass": "replace-with-strong-password"
+  },
+  {
+    "name": "mikrotik-core-cyber",
+    "type": "mikrotik",
+    "host": "103.195.65.3",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-core-office",
+    "type": "mikrotik",
+    "host": "10.28.0.21",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-core-sg",
+    "type": "mikrotik",
+    "host": "103.176.59.21",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-dist-public",
+    "type": "mikrotik",
+    "host": "10.28.0.24",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid1",
+    "type": "mikrotik",
+    "host": "41.216.186.2",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid2",
+    "type": "mikrotik",
+    "host": "103.195.65.18",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid3",
+    "type": "mikrotik",
+    "host": "103.195.65.22",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid4",
+    "type": "mikrotik",
+    "host": "31.56.78.4",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid5",
+    "type": "mikrotik",
+    "host": "31.56.78.5",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid6",
+    "type": "mikrotik",
+    "host": "31.56.78.6",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid7",
+    "type": "mikrotik",
+    "host": "41.216.190.7",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippid8",
+    "type": "mikrotik",
+    "host": "41.216.190.8",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+
+  {
+    "name": "mikrotik-ippsg1",
+    "type": "mikrotik",
+    "host": "103.118.175.8",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg2",
+    "type": "mikrotik",
+    "host": "103.118.175.4",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg3",
+    "type": "mikrotik",
+    "host": "45.149.93.3",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg4",
+    "type": "mikrotik",
+    "host": "45.149.93.4",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg5",
+    "type": "mikrotik",
+    "host": "45.149.93.5",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg6",
+    "type": "mikrotik",
+    "host": "45.149.93.6",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg7",
+    "type": "mikrotik",
+    "host": "45.149.93.7",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-ippsg8",
+    "type": "mikrotik",
+    "host": "45.149.93.8",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-mdg-hotspot",
+    "type": "mikrotik",
+    "host": "10.28.0.22",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-mdg-pppoe-2",
+    "type": "mikrotik",
+    "host": "10.28.0.23",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-rb4011-skansika",
+    "type": "mikrotik",
+    "host": "163.61.159.114",
+    "port": 22,
+    "user": "skansika",
+    "password": "GARUDAM3mb4h4n4**",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-smansakar",
+    "type": "mikrotik",
+    "host": "202.152.157.106",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-pppoe-office",
+    "type": "mikrotik",
+    "host": "10.28.0.20",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-office-noc",
+    "type": "mikrotik",
+    "host": "10.28.0.17",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-pn-kpgk",
+    "type": "mikrotik",
+    "host": "10.11.0.105",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-pn-pkl",
+    "type": "mikrotik",
+    "host": "10.11.0.104",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-sw-office",
+    "type": "mikrotik",
+    "host": "10.28.0.19",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-crs317-10g",
+    "type": "mikrotik",
+    "host": "10.28.0.26",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-id-bgp-collector",
+    "type": "mikrotik",
+    "host": "41.216.186.12",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "mikrotik-binetsg1",
+    "type": "mikrotik",
+    "host": "45.149.93.44",
+    "port": 22,
+    "user": "sangprabu",
+    "password": "s4ngprabu",
+    "private_key": "/root/.ssh/mikrotik_key"
+  }
+]

@@ -1,0 +1,85 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{block "title" .}}Backup System{{end}}</title>
+  <link rel="stylesheet" href="/static/app.css">
+  <script>
+    (function(){
+      const t = localStorage.getItem('theme');
+      if (t) document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="nav-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/>
+      <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/>
+    </svg>
+    Backup System
+  </a>
+
+  <div class="nav-links">
+    <a href="/" class="nav-link {{block "nav-dashboard" .}}{{end}}">Dashboard</a>
+    {{if .Session}}
+      {{if eq .Session.Role "admin"}}
+        <a href="/admin/users" class="nav-link {{block "nav-admin" .}}{{end}}">Users</a>
+      {{end}}
+    {{end}}
+  </div>
+
+  <div class="nav-right">
+    {{if .Session}}
+      <span class="nav-user">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        {{.Session.Username}}
+        <span class="badge badge-{{.Session.Role}}">{{.Session.Role}}</span>
+      </span>
+      <a href="/logout" class="btn btn-ghost btn-sm">Sign out</a>
+    {{end}}
+    <button class="theme-btn" onclick="toggleTheme()" title="Toggle theme" aria-label="Toggle dark mode">
+      <svg id="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+        <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg id="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </div>
+</nav>
+
+<div class="container">
+  {{block "content" .}}{{end}}
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const cur = html.dataset.theme;
+  const next = cur === 'dark' ? 'light' : 'dark';
+  html.dataset.theme = next;
+  localStorage.setItem('theme', next);
+  updateThemeIcon();
+}
+function updateThemeIcon() {
+  const isDark = document.documentElement.dataset.theme === 'dark' ||
+    (!document.documentElement.dataset.theme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.getElementById('icon-sun').style.display  = isDark ? 'block' : 'none';
+  document.getElementById('icon-moon').style.display = isDark ? 'none'  : 'block';
+}
+updateThemeIcon();
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', updateThemeIcon);
+</script>
+{{block "scripts" .}}{{end}}
+</body>
+</html>
+{{end}}

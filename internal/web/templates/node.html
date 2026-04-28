@@ -1,0 +1,108 @@
+{{template "base" .}}
+
+{{define "title"}}{{.Node.Name}} — Backup System{{end}}
+
+{{define "content"}}
+<div style="margin-bottom:1rem">
+  <a href="/" class="btn btn-ghost btn-sm">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="15 18 9 12 15 6"/>
+    </svg>
+    Back
+  </a>
+</div>
+
+<div class="detail-header">
+  <div style="flex:1">
+    <div class="flex items-center gap-2" style="flex-wrap:wrap">
+      <h1 class="detail-title">{{.Node.Name}}</h1>
+      {{if eq .Node.LastStatus "SUCCESS"}}
+        <span class="badge badge-success"><span class="dot dot-success"></span>OK</span>
+      {{else if eq .Node.LastStatus "ERROR"}}
+        <span class="badge badge-error"><span class="dot dot-error"></span>Error</span>
+      {{else}}
+        <span class="badge badge-unknown"><span class="dot dot-unknown"></span>Unknown</span>
+      {{end}}
+    </div>
+    <div class="detail-meta">
+      <span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+        </svg>
+        <span class="chip">{{.Node.Type}}</span>
+      </span>
+      <span>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        Last backup: {{if .Node.LastTime.IsZero}}never{{else}}{{fmtTime .Node.LastTime}} ({{timeAgo .Node.LastTime}}){{end}}
+      </span>
+      <span class="mono">{{.Node.Host}}</span>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+
+  <div>
+    <p class="section-title">Backup Files ({{len .Node.BackupFiles}})</p>
+    {{if .Node.BackupFiles}}
+      <div class="file-list">
+        {{range .Node.BackupFiles}}
+        <div class="file-item">
+          <div>
+            <div class="file-name">{{.Name}}</div>
+            <div class="file-meta">{{.SizeStr}} &middot; {{fmtTime .ModTime}}</div>
+          </div>
+          <a href="/storage/{{.RelPath}}" class="btn btn-ghost btn-sm" download>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download
+          </a>
+        </div>
+        {{end}}
+      </div>
+    {{else}}
+      <div class="card" style="padding:1.5rem;text-align:center;color:var(--text-muted)">No backup files found</div>
+    {{end}}
+  </div>
+
+  <div>
+    <div class="flex items-center justify-between" style="margin-bottom:.75rem">
+      <p class="section-title" style="margin:0">Log (last 80 lines)</p>
+      <button class="btn btn-ghost btn-sm" onclick="location.reload()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+        Refresh
+      </button>
+    </div>
+    <div class="log-box" id="logbox">
+      {{range .LogLines}}<span class="{{logClass .}}">{{.}}</span>
+{{end}}
+    </div>
+  </div>
+
+</div>
+
+{{end}}
+
+{{define "scripts"}}
+<script>
+// Auto-scroll log to bottom
+const lb = document.getElementById('logbox');
+if (lb) lb.scrollTop = lb.scrollHeight;
+
+// Responsive: stack on small screens
+function adjustLayout() {
+  const grid = document.querySelector('[style*="grid-template-columns"]');
+  if (!grid) return;
+  grid.style.gridTemplateColumns = window.innerWidth < 768 ? '1fr' : '1fr 1fr';
+}
+adjustLayout();
+window.addEventListener('resize', adjustLayout);
+</script>
+{{end}}

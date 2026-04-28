@@ -1,0 +1,110 @@
+{{template "base" .}}
+
+{{define "title"}}Dashboard — Backup System{{end}}
+{{define "nav-dashboard"}}active{{end}}
+
+{{define "content"}}
+<div class="page-header flex items-center justify-between" style="flex-wrap:wrap;gap:.75rem">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub">{{.Total}} nodes monitored</p>
+  </div>
+</div>
+
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Total</div>
+    <div class="stat-value total">{{.Total}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Success</div>
+    <div class="stat-value ok">{{.OK}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Failed</div>
+    <div class="stat-value fail">{{.Failed}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Unknown</div>
+    <div class="stat-value unknown">{{.Unknown}}</div>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <input class="search-input" type="text" id="search" placeholder="Search node..." oninput="filterNodes()">
+  <button class="filter-btn active" data-filter="all"        onclick="setFilter('all',this)">All</button>
+  <button class="filter-btn"        data-filter="mikrotik"   onclick="setFilter('mikrotik',this)">Mikrotik</button>
+  <button class="filter-btn"        data-filter="database"   onclick="setFilter('database',this)">Database</button>
+  <button class="filter-btn"        data-filter="SUCCESS"    onclick="setFilter('SUCCESS',this)">OK</button>
+  <button class="filter-btn"        data-filter="ERROR"      onclick="setFilter('ERROR',this)">Failed</button>
+</div>
+
+<div class="table-wrap">
+  <table id="nodes-table">
+    <thead>
+      <tr>
+        <th>Node</th>
+        <th>Type</th>
+        <th>Host</th>
+        <th>Last Backup</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Nodes}}
+      <tr data-type="{{.Type}}" data-status="{{.LastStatus}}" data-name="{{.Name}}">
+        <td>
+          <div class="node-name">
+            <a href="/nodes/{{.Name}}" style="color:inherit">{{.Name}}</a>
+          </div>
+        </td>
+        <td><span class="chip">{{.Type}}</span></td>
+        <td><span class="node-host">{{.Host}}</span></td>
+        <td class="text-muted text-sm">
+          {{if .LastTime.IsZero}}—{{else}}{{fmtTime .LastTime}} <span style="opacity:.65">({{timeAgo .LastTime}})</span>{{end}}
+        </td>
+        <td>
+          {{if eq .LastStatus "SUCCESS"}}
+            <span class="badge badge-success"><span class="dot dot-success"></span>OK</span>
+          {{else if eq .LastStatus "ERROR"}}
+            <span class="badge badge-error"><span class="dot dot-error"></span>Error</span>
+          {{else}}
+            <span class="badge badge-unknown"><span class="dot dot-unknown"></span>Unknown</span>
+          {{end}}
+        </td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{end}}
+
+{{define "scripts"}}
+<script>
+let activeFilter = 'all';
+
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  filterNodes();
+}
+
+function filterNodes() {
+  const q = document.getElementById('search').value.toLowerCase();
+  document.querySelectorAll('#nodes-table tbody tr').forEach(row => {
+    const name   = row.dataset.name.toLowerCase();
+    const type   = row.dataset.type;
+    const status = row.dataset.status;
+
+    const matchSearch = !q || name.includes(q);
+    const matchFilter =
+      activeFilter === 'all' ||
+      type   === activeFilter ||
+      status === activeFilter;
+
+    row.style.display = (matchSearch && matchFilter) ? '' : 'none';
+  });
+}
+</script>
+{{end}}
