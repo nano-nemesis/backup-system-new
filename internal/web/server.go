@@ -9,6 +9,8 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -58,23 +60,26 @@ func (s *Server) routes() {
 	staticFS, _ := fs.Sub(embeddedFS, "static")
 	s.mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 
-	s.mux.HandleFunc("GET /login", s.handleLoginPage)
-	s.mux.HandleFunc("POST /login", s.handleLoginSubmit)
-	s.mux.HandleFunc("GET /logout", s.handleLogout)
-	s.mux.HandleFunc("GET /setup", s.handleSetupPage)
-	s.mux.HandleFunc("POST /setup", s.handleSetupSubmit)
-
-	s.mux.HandleFunc("GET /{$}", s.auth(s.handleDashboard))
-	s.mux.HandleFunc("GET /nodes/{name}", s.auth(s.handleNode))
 	s.mux.HandleFunc("GET /storage/{type}/{file}", s.auth(s.handleDownload))
 
-	s.mux.HandleFunc("GET /admin/users", s.auth(s.admin(s.handleAdminUsers)))
-	s.mux.HandleFunc("POST /admin/users", s.auth(s.admin(s.handleAdminCreateUser)))
-	s.mux.HandleFunc("POST /admin/users/{id}/delete", s.auth(s.admin(s.handleAdminDeleteUser)))
-	s.mux.HandleFunc("POST /admin/users/{id}/role", s.auth(s.admin(s.handleAdminUpdateRole)))
-	s.mux.HandleFunc("POST /admin/users/{id}/password", s.auth(s.admin(s.handleAdminUpdatePassword)))
-
 	s.apiRoutes()
+
+	// React SPA: serve frontend/dist, fall back to index.html for client-side routing
+	s.mux.HandleFunc("/", s.handleSPA)
+}
+
+func (s *Server) handleSPA(w http.ResponseWriter, r *http.Request) {
+	frontendDir := s.cfg.FrontendDir
+	requestedPath := filepath.Join(frontendDir, filepath.Clean("/"+r.URL.Path))
+
+	info, err := os.Stat(requestedPath)
+	if err == nil && !info.IsDir() {
+		http.ServeFile(w, r, requestedPath)
+		return
+	}
+
+	// SPA fallback: serve index.html for all unmatched paths
+	http.ServeFile(w, r, filepath.Join(frontendDir, "index.html"))
 }
 
 func (s *Server) ListenAndServe() error {

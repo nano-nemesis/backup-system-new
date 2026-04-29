@@ -40,6 +40,7 @@ type Config struct {
 	WebUsersFile string
 	WebTLSCert   string
 	WebTLSKey    string
+	FrontendDir  string
 }
 
 func Load(envPath string) (Config, error) {
@@ -69,6 +70,7 @@ func Load(envPath string) (Config, error) {
 		WebUsersFile: getEnv("WEB_USERS_FILE", "users.json"),
 		WebTLSCert:   strings.TrimSpace(os.Getenv("WEB_TLS_CERT")),
 		WebTLSKey:    strings.TrimSpace(os.Getenv("WEB_TLS_KEY")),
+		FrontendDir:  getEnv("FRONTEND_DIR", "frontend/dist"),
 	}
 
 	if !filepath.IsAbs(cfg.NodesPath) {
