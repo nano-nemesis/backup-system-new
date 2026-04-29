@@ -1,0 +1,22 @@
+[
+  {
+    "name": "mikrotik-core",
+    "type": "mikrotik",
+    "host": "10.0.0.1",
+    "port": 22,
+    "user": "admin",
+    "password": "your-password-here",
+    "private_key": "/root/.ssh/mikrotik_key"
+  },
+  {
+    "name": "db-production",
+    "type": "database",
+    "host": "10.0.0.2",
+    "port": 22,
+    "ssh_user": "root",
+    "ssh_key": "/root/.ssh/id_rsa",
+    "db_name": "app_production",
+    "db_user": "backup",
+    "db_pass": "your-db-password-here"
+  }
+]

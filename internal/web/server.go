@@ -73,6 +73,8 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("POST /admin/users/{id}/delete", s.auth(s.admin(s.handleAdminDeleteUser)))
 	s.mux.HandleFunc("POST /admin/users/{id}/role", s.auth(s.admin(s.handleAdminUpdateRole)))
 	s.mux.HandleFunc("POST /admin/users/{id}/password", s.auth(s.admin(s.handleAdminUpdatePassword)))
+
+	s.apiRoutes()
 }
 
 func (s *Server) ListenAndServe() error {

@@ -1,6 +1,24 @@
+# Environment & secrets
 .env
 .env.*
+
+# Node credentials — NEVER commit, contains SSH keys & passwords
+nodes.json
+
+# User accounts — contains bcrypt hashes
+users.json
+
+# Build output
 bin/
+frontend/dist/
+frontend/node_modules/
+
+# Logs & runtime
 *.log
+logs/
+storage/
+
+# TLS
 *.key
 *.pem
+*.crt
