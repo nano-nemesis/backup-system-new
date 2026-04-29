@@ -3,24 +3,27 @@ import { RouterProvider } from 'react-router-dom'
 import { Toaster } from 'sonner'
 import { queryClient } from '@/lib/queryClient'
 import { AuthProvider } from '@/context/AuthContext'
+import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import { router } from '@/routes'
+
+function AppContent() {
+  const { theme } = useTheme()
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster position="bottom-right" theme={theme} richColors />
+    </>
+  )
+}
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <RouterProvider router={router} />
-        <Toaster
-          position="bottom-right"
-          toastOptions={{
-            style: {
-              background: '#18181b',
-              border: '1px solid #27272a',
-              color: '#fafafa',
-            },
-          }}
-        />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <AppContent />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   )
 }

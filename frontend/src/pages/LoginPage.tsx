@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Server, Loader2 } from 'lucide-react'
+import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
-import axios from 'axios'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,17 +22,16 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!username || !password) return
-
     setLoading(true)
     try {
       await login(username, password)
       navigate('/', { replace: true })
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const status = err.response?.status
-        if (status === 401) toast.error('Invalid username or password')
-        else if (status === 429) toast.error('Too many attempts — try again in 5 minutes')
-        else toast.error('Login failed. Please try again.')
+      if (isAxiosError(err)) {
+        const s = err.response?.status
+        if (s === 401)      toast.error('Invalid username or password')
+        else if (s === 429) toast.error('Too many attempts — try again in 5 minutes')
+        else                toast.error('Login failed. Please try again.')
       } else {
         toast.error('An unexpected error occurred')
       }
@@ -42,29 +41,26 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-bg flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
-        {/* Logo */}
         <div className="flex flex-col items-center mb-8">
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4">
             <Server className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-xl font-bold text-zinc-100">Backup System</h1>
-          <p className="text-sm text-zinc-500 mt-1">Sign in to your account</p>
+          <h1 className="text-xl font-bold text-fg">Backup System</h1>
+          <p className="text-sm text-muted mt-1">Sign in to your account</p>
         </div>
 
-        {/* Card */}
-        <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+        <div className="rounded-xl border border-line bg-surface p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="username">Username</Label>
               <Input
                 id="username"
-                type="text"
                 autoComplete="username"
                 autoFocus
                 value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={e => setUsername(e.target.value)}
                 placeholder="Enter username"
                 disabled={loading}
               />
@@ -76,20 +72,13 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={e => setPassword(e.target.value)}
                 placeholder="Enter password"
                 disabled={loading}
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading || !username || !password}>
-              {loading ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  Signing in…
-                </>
-              ) : (
-                'Sign in'
-              )}
+              {loading ? <><Loader2 className="animate-spin" />Signing in…</> : 'Sign in'}
             </Button>
           </form>
         </div>

@@ -7,5 +7,6 @@ export function useNodes() {
     queryKey: ['nodes'],
     queryFn: () => api.get<NodesResponse>('/nodes').then((r) => r.data),
     refetchInterval: 30_000,
+    refetchIntervalInBackground: false,
   })
 }

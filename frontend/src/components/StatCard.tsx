@@ -11,14 +11,14 @@ interface Props {
 
 export default function StatCard({ label, value, colorClass, icon }: Props) {
   return (
-    <Card className="relative overflow-hidden">
+    <Card>
       <CardContent className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">{label}</p>
+            <p className="text-xs font-medium text-muted uppercase tracking-wider">{label}</p>
             <p className={cn('text-3xl font-bold mt-1 tabular-nums', colorClass)}>{value}</p>
           </div>
-          <div className={cn('p-2.5 rounded-lg bg-zinc-800', colorClass)}>{icon}</div>
+          <div className={cn('p-2.5 rounded-lg bg-surface-2', colorClass)}>{icon}</div>
         </div>
       </CardContent>
     </Card>

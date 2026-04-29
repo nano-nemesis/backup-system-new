@@ -1,18 +1,23 @@
 import type { Config } from 'tailwindcss'
 
 export default {
-  content: [
-    './index.html',
-    './src/**/*.{ts,tsx}',
-  ],
+  darkMode: 'class',
+  content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
       fontFamily: {
         mono: ['JetBrains Mono', 'Fira Code', 'Cascadia Code', 'monospace'],
       },
       colors: {
-        surface: '#18181b',
-        'surface-2': '#1f1f23',
+        bg:          'rgb(var(--c-bg) / <alpha-value>)',
+        surface:     'rgb(var(--c-surface) / <alpha-value>)',
+        'surface-2': 'rgb(var(--c-surface-2) / <alpha-value>)',
+        line:        'rgb(var(--c-line) / <alpha-value>)',
+        fg:          'rgb(var(--c-fg) / <alpha-value>)',
+        muted:       'rgb(var(--c-muted) / <alpha-value>)',
+      },
+      borderColor: {
+        DEFAULT: 'rgb(var(--c-line) / <alpha-value>)',
       },
       keyframes: {
         'pulse-dot': {

@@ -1,18 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 
-interface Props {
-  lines: string[]
-}
-
 function lineClass(line: string): string {
   const lower = line.toLowerCase()
-  if (lower.includes('error')) return 'text-red-400'
-  if (lower.includes('success')) return 'text-green-400'
-  return 'text-zinc-400'
+  if (lower.includes('error')) return 'text-red-600 dark:text-red-400'
+  if (lower.includes('success')) return 'text-green-600 dark:text-green-400'
+  return 'text-muted'
 }
 
-export default function LogViewer({ lines }: Props) {
+export default function LogViewer({ lines }: { lines: string[] }) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -20,16 +16,16 @@ export default function LogViewer({ lines }: Props) {
   }, [lines])
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-950 overflow-hidden">
-      <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-zinc-800">
-        <div className="w-2.5 h-2.5 rounded-full bg-red-500/60" />
-        <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
-        <div className="w-2.5 h-2.5 rounded-full bg-green-500/60" />
-        <span className="ml-2 text-xs text-zinc-600">node.log (last {lines.length} lines)</span>
+    <div className="rounded-xl border border-line bg-surface-2 overflow-hidden">
+      <div className="flex items-center gap-1.5 px-4 py-2.5 border-b border-line">
+        <div className="w-2.5 h-2.5 rounded-full bg-red-400/60" />
+        <div className="w-2.5 h-2.5 rounded-full bg-amber-400/60" />
+        <div className="w-2.5 h-2.5 rounded-full bg-green-400/60" />
+        <span className="ml-2 text-xs text-muted">node.log ({lines.length} lines)</span>
       </div>
       <div className="overflow-y-auto max-h-96 p-4 scrollbar-thin">
         {lines.length === 0 ? (
-          <p className="text-xs text-zinc-600 italic">No log entries found.</p>
+          <p className="text-xs text-muted italic">No log entries found.</p>
         ) : (
           <div className="space-y-0.5">
             {lines.map((line, i) => (

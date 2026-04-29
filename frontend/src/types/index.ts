@@ -64,9 +64,3 @@ export interface LoginResponse {
   user: User
 }
 
-export interface ParsedLogEntry {
-  timestamp: string
-  date: string
-  status: 'SUCCESS' | 'ERROR' | null
-  raw: string
-}

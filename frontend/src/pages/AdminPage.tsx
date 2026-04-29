@@ -1,50 +1,33 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UserPlus, Trash2, KeyRound, ShieldCheck, Loader2 } from 'lucide-react'
+import { isAxiosError } from 'axios'
 import { toast } from 'sonner'
-import axios from 'axios'
 import api from '@/lib/axios'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from '@/components/ui/dialog'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table'
 import { formatDateTime } from '@/lib/utils'
 import type { AdminUser, AdminUsersResponse, Role } from '@/types'
 
-// ─── API calls ────────────────────────────────────────────────────────────────
+// ─── API helpers ─────────────────────────────────────────────────────────────
 
-const fetchUsers = () => api.get<AdminUsersResponse>('/admin/users').then((r) => r.data)
-const createUser = (body: { username: string; password: string; role: Role }) =>
-  api.post('/admin/users', body)
-const deleteUser = (id: string) => api.delete(`/admin/users/${id}`)
-const updateRole = (id: string, role: Role) => api.patch(`/admin/users/${id}/role`, { role })
-const updatePassword = (id: string, password: string) =>
-  api.patch(`/admin/users/${id}/password`, { password })
+const fetchUsers  = () => api.get<AdminUsersResponse>('/admin/users').then(r => r.data)
+const createUser  = (body: { username: string; password: string; role: Role }) => api.post('/admin/users', body)
+const deleteUser  = (id: string) => api.delete(`/admin/users/${id}`)
+const updateRole  = (id: string, role: Role) => api.patch(`/admin/users/${id}/role`, { role })
+const updatePassword = (id: string, password: string) => api.patch(`/admin/users/${id}/password`, { password })
 
-// ─── Sub-modals ───────────────────────────────────────────────────────────────
+function apiError(err: unknown, fallback: string): string {
+  return isAxiosError(err) ? (err.response?.data?.error ?? fallback) : fallback
+}
+
+// ─── Create user dialog ──────────────────────────────────────────────────────
 
 function CreateUserDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const qc = useQueryClient()
@@ -52,42 +35,34 @@ function CreateUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
   const [password, setPassword] = useState('')
   const [role, setRole] = useState<Role>('viewer')
 
-  const mutation = useMutation({
+  const mut = useMutation({
     mutationFn: () => createUser({ username, password, role }),
     onSuccess: () => {
       toast.success('User created')
       qc.invalidateQueries({ queryKey: ['admin-users'] })
+      setUsername(''); setPassword(''); setRole('viewer')
       onClose()
-      setUsername('')
-      setPassword('')
-      setRole('viewer')
     },
-    onError: (err) => {
-      if (axios.isAxiosError(err)) toast.error(err.response?.data?.error ?? 'Failed to create user')
-    },
+    onError: err => toast.error(apiError(err, 'Failed to create user')),
   })
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Create User</DialogTitle>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>Create User</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>Username</Label>
-            <Input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="username" />
+            <Input value={username} onChange={e => setUsername(e.target.value)} placeholder="username" disabled={mut.isPending} />
           </div>
           <div className="space-y-1.5">
             <Label>Password</Label>
-            <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Min. 8 characters" />
+            <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters" disabled={mut.isPending} />
           </div>
           <div className="space-y-1.5">
             <Label>Role</Label>
-            <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
+            <Select value={role} onValueChange={v => setRole(v as Role)} disabled={mut.isPending}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="viewer">Viewer</SelectItem>
                 <SelectItem value="admin">Admin</SelectItem>
@@ -95,12 +70,8 @@ function CreateUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
             </Select>
           </div>
           <div className="flex gap-2 pt-1">
-            <Button
-              className="flex-1"
-              onClick={() => mutation.mutate()}
-              disabled={!username || !password || mutation.isPending}
-            >
-              {mutation.isPending ? <Loader2 className="animate-spin" /> : <UserPlus />}
+            <Button className="flex-1" onClick={() => mut.mutate()} disabled={!username || password.length < 8 || mut.isPending}>
+              {mut.isPending ? <Loader2 className="animate-spin" /> : <UserPlus />}
               Create
             </Button>
             <DialogClose asChild>
@@ -113,52 +84,35 @@ function CreateUserDialog({ open, onClose }: { open: boolean; onClose: () => voi
   )
 }
 
-function ChangePasswordDialog({
-  user,
-  onClose,
-}: {
-  user: AdminUser | null
-  onClose: () => void
-}) {
+// ─── Change password dialog ──────────────────────────────────────────────────
+
+function ChangePasswordDialog({ user, onClose }: { user: AdminUser | null; onClose: () => void }) {
   const qc = useQueryClient()
   const [password, setPassword] = useState('')
 
-  const mutation = useMutation({
+  const mut = useMutation({
     mutationFn: () => updatePassword(user!.id, password),
     onSuccess: () => {
       toast.success('Password updated')
       qc.invalidateQueries({ queryKey: ['admin-users'] })
-      onClose()
       setPassword('')
+      onClose()
     },
-    onError: (err) => {
-      if (axios.isAxiosError(err)) toast.error(err.response?.data?.error ?? 'Failed to update password')
-    },
+    onError: err => toast.error(apiError(err, 'Failed to update password')),
   })
 
   return (
-    <Dialog open={!!user} onOpenChange={(v) => !v && onClose()}>
+    <Dialog open={!!user} onOpenChange={v => !v && onClose()}>
       <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Change password — {user?.username}</DialogTitle>
-        </DialogHeader>
+        <DialogHeader><DialogTitle>Change password — {user?.username}</DialogTitle></DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
             <Label>New Password</Label>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Min. 8 characters"
-            />
+            <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Min. 8 characters" disabled={mut.isPending} />
           </div>
           <div className="flex gap-2 pt-1">
-            <Button
-              className="flex-1"
-              onClick={() => mutation.mutate()}
-              disabled={password.length < 8 || mutation.isPending}
-            >
-              {mutation.isPending ? <Loader2 className="animate-spin" /> : <KeyRound />}
+            <Button className="flex-1" onClick={() => mut.mutate()} disabled={password.length < 8 || mut.isPending}>
+              {mut.isPending ? <Loader2 className="animate-spin" /> : <KeyRound />}
               Update
             </Button>
             <DialogClose asChild>
@@ -174,67 +128,51 @@ function ChangePasswordDialog({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function AdminPage() {
-  const { user: currentUser } = useAuth()
+  const { user: me } = useAuth()
   const qc = useQueryClient()
   const [showCreate, setShowCreate] = useState(false)
   const [pwUser, setPwUser] = useState<AdminUser | null>(null)
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['admin-users'],
-    queryFn: fetchUsers,
-  })
+  const { data, isLoading } = useQuery({ queryKey: ['admin-users'], queryFn: fetchUsers })
 
-  const deleteMutation = useMutation({
+  const deleteMut = useMutation({
     mutationFn: (id: string) => deleteUser(id),
-    onSuccess: () => {
-      toast.success('User deleted')
-      qc.invalidateQueries({ queryKey: ['admin-users'] })
-    },
-    onError: (err) => {
-      if (axios.isAxiosError(err)) toast.error(err.response?.data?.error ?? 'Failed to delete user')
-    },
+    onSuccess: () => { toast.success('User deleted'); qc.invalidateQueries({ queryKey: ['admin-users'] }) },
+    onError: err => toast.error(apiError(err, 'Failed to delete user')),
   })
 
-  const roleMutation = useMutation({
+  const roleMut = useMutation({
     mutationFn: ({ id, role }: { id: string; role: Role }) => updateRole(id, role),
-    onSuccess: () => {
-      toast.success('Role updated')
-      qc.invalidateQueries({ queryKey: ['admin-users'] })
-    },
-    onError: (err) => {
-      if (axios.isAxiosError(err)) toast.error(err.response?.data?.error ?? 'Failed to update role')
-    },
+    onSuccess: () => { toast.success('Role updated'); qc.invalidateQueries({ queryKey: ['admin-users'] }) },
+    onError: err => toast.error(apiError(err, 'Failed to update role')),
   })
 
   function confirmDelete(u: AdminUser) {
-    if (!confirm(`Delete user "${u.username}"? This cannot be undone.`)) return
-    deleteMutation.mutate(u.id)
+    if (!confirm(`Delete "${u.username}"? This cannot be undone.`)) return
+    deleteMut.mutate(u.id)
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Users</h1>
-          <p className="text-sm text-zinc-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-fg">Users</h1>
+          <p className="text-sm text-muted mt-0.5">
             {data ? `${data.users.length} account${data.users.length !== 1 ? 's' : ''}` : 'Loading…'}
           </p>
         </div>
         <Button onClick={() => setShowCreate(true)}>
-          <UserPlus />
-          Add User
+          <UserPlus />Add User
         </Button>
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl border border-zinc-800 overflow-hidden">
+      <div className="rounded-xl border border-line overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow className="hover:bg-transparent">
               <TableHead>Username</TableHead>
               <TableHead>Role</TableHead>
-              <TableHead>Created</TableHead>
+              <TableHead className="hidden sm:table-cell">Created</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -242,59 +180,48 @@ export default function AdminPage() {
             {isLoading && (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-10">
-                  <Loader2 className="w-5 h-5 animate-spin text-zinc-600 mx-auto" />
+                  <Loader2 className="w-5 h-5 animate-spin text-muted mx-auto" />
                 </TableCell>
               </TableRow>
             )}
-            {data?.users.map((u) => (
+            {data?.users.map(u => (
               <TableRow key={u.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-zinc-800 flex items-center justify-center">
-                      <span className="text-xs font-semibold text-zinc-400">
-                        {u.username[0].toUpperCase()}
-                      </span>
+                    <div className="w-7 h-7 rounded-full bg-surface-2 flex items-center justify-center shrink-0">
+                      <span className="text-xs font-semibold text-muted">{u.username[0].toUpperCase()}</span>
                     </div>
-                    <span className="font-medium text-zinc-200">{u.username}</span>
-                    {u.id === currentUser?.id && (
-                      <Badge variant="default" className="text-xs">You</Badge>
-                    )}
+                    <span className="font-medium text-fg">{u.username}</span>
+                    {u.id === me?.id && <Badge variant="default" className="text-xs">You</Badge>}
                   </div>
                 </TableCell>
                 <TableCell>
                   <Select
                     value={u.role}
-                    disabled={u.id === currentUser?.id || roleMutation.isPending}
-                    onValueChange={(v) => roleMutation.mutate({ id: u.id, role: v as Role })}
+                    disabled={u.id === me?.id || roleMut.isPending}
+                    onValueChange={v => roleMut.mutate({ id: u.id, role: v as Role })}
                   >
-                    <SelectTrigger className="w-28 h-7 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
+                    <SelectTrigger className="w-28 h-7 text-xs"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="viewer">Viewer</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>
-                <TableCell>
-                  <span className="text-xs text-zinc-500">{formatDateTime(u.created_at)}</span>
+                <TableCell className="hidden sm:table-cell">
+                  <span className="text-xs text-muted">{formatDateTime(u.created_at)}</span>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center justify-end gap-1.5">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPwUser(u)}
-                      title="Change password"
-                    >
+                    <Button variant="ghost" size="sm" onClick={() => setPwUser(u)} title="Change password">
                       <KeyRound className="w-3.5 h-3.5" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      disabled={u.id === currentUser?.id || deleteMutation.isPending}
+                      disabled={u.id === me?.id || deleteMut.isPending}
                       onClick={() => confirmDelete(u)}
-                      className="text-red-500 hover:text-red-400 hover:bg-red-950/30"
+                      className="text-red-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30"
                       title="Delete user"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -307,13 +234,11 @@ export default function AdminPage() {
         </Table>
       </div>
 
-      {/* Admin badge legend */}
-      <div className="flex items-center gap-2 text-xs text-zinc-600">
+      <div className="flex items-center gap-2 text-xs text-muted">
         <ShieldCheck className="w-3.5 h-3.5" />
         Admins can manage users. Viewers can only view the dashboard.
       </div>
 
-      {/* Dialogs */}
       <CreateUserDialog open={showCreate} onClose={() => setShowCreate(false)} />
       <ChangePasswordDialog user={pwUser} onClose={() => setPwUser(null)} />
     </div>

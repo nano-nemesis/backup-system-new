@@ -8,6 +8,7 @@ export function useNode(name: string) {
     queryFn: () =>
       api.get<NodeDetailResponse>(`/nodes/${encodeURIComponent(name)}`).then((r) => r.data),
     refetchInterval: 15_000,
+    refetchIntervalInBackground: false,
     enabled: !!name,
   })
 }
