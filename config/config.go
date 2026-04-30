@@ -34,6 +34,8 @@ type Config struct {
 	MaxParallelBackups  int
 	AlertCooldown       time.Duration
 	MonitorPollInterval time.Duration
+	BackupIntervalHours int
+	BackupTimezone      string
 
 	WebListen    string
 	WebSecret    string
@@ -64,6 +66,8 @@ func Load(envPath string) (Config, error) {
 		MaxParallelBackups:  getEnvInt("MAX_PARALLEL_BACKUPS", 0),
 		AlertCooldown:       getEnvDuration("ALERT_COOLDOWN", defaultCooldown),
 		MonitorPollInterval: getEnvDuration("MONITOR_POLL_INTERVAL", defaultPoll),
+		BackupIntervalHours: getEnvInt("BACKUP_INTERVAL_HOURS", 3),
+		BackupTimezone:      getEnv("BACKUP_TIMEZONE", "Asia/Jakarta"),
 
 		WebListen:    getEnv("WEB_LISTEN", "127.0.0.1:8080"),
 		WebSecret:    strings.TrimSpace(os.Getenv("WEB_SECRET")),
